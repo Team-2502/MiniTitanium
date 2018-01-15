@@ -18,7 +18,12 @@ public class DriveCommand extends Command
     protected void initialize() {}
 
     @Override
-    protected void execute() { driveTrainSubsystem.drive(); }
+    protected void execute()
+    {
+        System.out.printf("Angle: %.2f\n",Robot.NAVX.getYaw());
+        System.out.printf("Compass Heading: %.2f\n",Robot.NAVX.getCompassHeading());
+        driveTrainSubsystem.drive();
+    }
 
     @Override
     protected boolean isFinished() { return false; }
