@@ -19,21 +19,16 @@ public class DriveTrainSubsystem extends Subsystem
     public final WPI_TalonSRX leftTalon1;
     public final WPI_TalonSRX rightTalon0;
     public final WPI_TalonSRX rightTalon1;
-    private final DifferentialDrive drive;
-    public double leftSpeed;
-    public double rightSpeed;
-    public int millisecondsToRunTL = 1000;
-    public int millisecondsToRunTR = 1000;
+
     public SpeedControllerGroup leftSide;
     public SpeedControllerGroup rightSide;
-    public int m = 1000;
-    private double lastLeft;
-    private double lastRight;
+
+    private final DifferentialDrive drive;
+
+    private boolean slow = true;
 
     public DriveTrainSubsystem()
     {
-        lastLeft = 0.0D;
-        lastRight = 0.0D;
 
         leftTalon0 = new WPI_TalonSRX(RobotMap.Motor.LEFT_TALON_0);
         leftTalon1 = new WPI_TalonSRX(RobotMap.Motor.LEFT_TALON_1);
@@ -44,63 +39,44 @@ public class DriveTrainSubsystem extends Subsystem
         rightSide = new SpeedControllerGroup(rightTalon0, rightTalon1);
 
         drive = new DifferentialDrive(leftSide, rightSide);
-    }
 
-    public void setTeleopSettings(WPI_TalonSRX talon)
-    {
-        talon.configNominalOutputReverse(0.0d, 10);
-        talon.set(ControlMode.PercentOutput, 0.0d);
+        drive.setDeadband(0.05);
+        drive.setSafetyEnabled(true);
+        drive.setMaxOutput(0.5);
     }
 
     @Override
     protected void initDefaultCommand() { setDefaultCommand(new DriveCommand()); }
 
-    private Pair<Double, Double> getSpeedArcade(Pair<Double, Double> out)
-    {
-        double yLevel = -OI.JOYSTICK.getY();
-
-        double xLevel = OI.JOYSTICK.getX();
-
-        if (Math.abs(yLevel) < 0.005D) { yLevel = 0.0D; }
-
-        if (Math.abs(xLevel) < 0.005D) { xLevel = 0.0D; }
-
-        out.left = xLevel;
-        out.right = yLevel;
-        return out;
-    }
-
-    private Pair<Double, Double> getSpeedArcade() { return getSpeedArcade(SPEED_CONTAINER); }
-
     public void drive()
     {
-        Pair<Double, Double> speed = getSpeedArcade();
-        drive.arcadeDrive(speed.left, speed.right);
+        drive.arcadeDrive(OI.JOYSTICK.getX(), OI.JOYSTICK.getY(), true);
     }
 
-    public void runMotors(double x, double y)
+
+    public void toggleSpeed()
     {
-        leftSpeed = x;
-        rightSpeed = y;
-        leftTalon0.set(ControlMode.Current, x);
-        leftTalon1.set(ControlMode.Current, x);
-        rightTalon0.set(ControlMode.Current, y);
-        rightTalon1.set(ControlMode.Current, y);
+        if (slow)
+        {
+            drive.setMaxOutput(1.0);
+            slow = false;
+        }
+
+        else
+        {
+            drive.setMaxOutput(0.5);
+            slow = true;
+        }
     }
 
-    public void stopDriveS()
+    public void runMotors(double rightSpeed, double leftSpeed)
     {
-        leftTalon0.set(ControlMode.Current, 0);
-        leftTalon1.set(ControlMode.Current, 0);
-        rightTalon0.set(ControlMode.Current, 0);
-        rightTalon1.set(ControlMode.Current, 0);
+        drive.tankDrive(rightSpeed, leftSpeed);
     }
 
     public void stop()
     {
-        lastLeft = 0.0D;
-        lastRight = 0.0D;
-        drive.tankDrive(0.0D, 0.0D);
+        drive.stopMotor();
     }
 
     @SuppressWarnings("WeakerAccess")

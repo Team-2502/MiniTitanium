@@ -1,5 +1,6 @@
 package com.team2502.titanium;
 
+import com.team2502.titanium.command.ToggleDriveSpeedCommand;
 import com.team2502.titanium.command.signaltower.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
@@ -18,6 +19,8 @@ public final class OI
     public static final Button SOUND1_BUTTON = new JoystickButton(JOYSTICK, 6);
     public static final Button SOUND2_BUTTON = new JoystickButton(JOYSTICK, 7);
 
+    public static final Button SPEEDY_BUTTON = new JoystickButton(JOYSTICK, 11);
+
     static
     {
         RED_BUTTON.whenPressed(new RedSignalCommand());
@@ -27,6 +30,7 @@ public final class OI
 //        CLEAR_BUTTON.whenPressed(new ClearSignalCommand());
         SOUND1_BUTTON.whenPressed(new Sound1SignalCommand());
         SOUND2_BUTTON.whenPressed(new Sound2SignalCommand());
+        SPEEDY_BUTTON.whenPressed(new ToggleDriveSpeedCommand());
     }
 
     private OI() {}
